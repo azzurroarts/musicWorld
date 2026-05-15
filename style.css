@@ -33,3 +33,11 @@ canvas {
 #controls {
   opacity: 0.8;
 }
+
+#positionReadout {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #ffffff;
+  opacity: 0.85;
+  line-height: 1.4;
+}
