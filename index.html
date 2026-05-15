@@ -1,27 +1,35 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Orbit Theory</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-<canvas id="game"></canvas>
+body {
+  overflow: hidden;
+  background: black;
+  font-family: Arial, sans-serif;
+}
 
-<div id="dialogueBox" class="hidden">
-  <div class="portrait"></div>
-  <div class="dialogue-content">
-    <h2 id="npcName">CAPTAIN SOL</h2>
-    <p id="dialogueText">
-      Welcome pilot. The universe is held together by intervals.
-    </p>
-    <button id="closeDialogue">Continue</button>
-  </div>
-</div>
+canvas {
+  display: block;
+}
 
-<script src="game.js"></script>
-</body>
-</html>
+#ui {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 100;
+  color: white;
+}
+
+#title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #4de2ff;
+  margin-bottom: 10px;
+  letter-spacing: 2px;
+}
+
+#controls {
+  opacity: 0.8;
+}
