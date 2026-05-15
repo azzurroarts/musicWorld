@@ -119,7 +119,59 @@ const planets = [
   createPlanet(-250, 80, -700, 60, 0x4de2ff),
   createPlanet(500, -100, -1200, 120, 0x5eff9b)
 ];
+//
+// 2D SPRITE BILLBOARDS
+//
 
+const textureLoader = new THREE.TextureLoader();
+
+function createBillboardSprite(url, x, y, z, scale = 30) {
+
+  const texture = textureLoader.load(url);
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true
+  });
+
+  const sprite = new THREE.Sprite(material);
+
+  sprite.position.set(x, y, z);
+
+  sprite.scale.set(scale, scale, 1);
+
+  scene.add(sprite);
+
+  return sprite;
+}
+
+const spriteNPCs = [
+
+  createBillboardSprite(
+    'https://threejs.org/examples/textures/sprite.png',
+    80,
+    20,
+    -220,
+    35
+  ),
+
+  createBillboardSprite(
+    'https://threejs.org/examples/textures/sprites/disc.png',
+    -180,
+    60,
+    -500,
+    45
+  ),
+
+  createBillboardSprite(
+    'https://threejs.org/examples/textures/sprites/snowflake1.png',
+    260,
+    -30,
+    -380,
+    25
+  )
+
+];
 //
 // CONTROLS
 //
