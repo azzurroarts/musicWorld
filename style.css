@@ -1,0 +1,76 @@
+/* style.css */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  overflow: hidden;
+  background: black;
+  font-family: Arial, sans-serif;
+  color: white;
+}
+
+canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  image-rendering: pixelated;
+}
+
+#dialogueBox {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 700px;
+  max-width: 90%;
+  background: rgba(10, 10, 30, 0.95);
+  border: 3px solid #4de2ff;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  gap: 20px;
+  box-shadow: 0 0 30px rgba(77,226,255,0.5);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.portrait {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(to bottom right, #4de2ff, #ff4dd2);
+  border-radius: 12px;
+}
+
+.dialogue-content {
+  flex: 1;
+}
+
+#npcName {
+  margin-bottom: 10px;
+  color: #4de2ff;
+}
+
+#dialogueText {
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+button {
+  background: #4de2ff;
+  color: black;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background: white;
+}
