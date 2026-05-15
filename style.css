@@ -20,6 +20,8 @@ canvas {
   left: 20px;
   z-index: 100;
   color: white;
+  pointer-events: none;
+  text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
 }
 
 #title {
@@ -31,13 +33,15 @@ canvas {
 }
 
 #controls {
-  opacity: 0.8;
+  opacity: 0.85;
+  max-width: 780px;
+  line-height: 1.35;
 }
 
 #positionReadout {
   margin-top: 10px;
   font-size: 14px;
   color: #ffffff;
-  opacity: 0.85;
+  opacity: 0.9;
   line-height: 1.4;
 }
