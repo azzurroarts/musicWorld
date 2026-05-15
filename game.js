@@ -175,7 +175,17 @@ const spriteNPCs = [
 //
 // CONTROLS
 //
+const positionReadout = document.getElementById('positionReadout');
 
+window.addEventListener('keydown', e => {
+  if (e.key.toLowerCase() === 'p') {
+    positionReadout.innerHTML =
+      `PLACE ITEM HERE:<br>
+      x: ${ship.position.x.toFixed(2)},<br>
+      y: ${ship.position.y.toFixed(2)},<br>
+      z: ${ship.position.z.toFixed(2)}`;
+  }
+});
 const keys = {};
 
 window.addEventListener('keydown', e => {
