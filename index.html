@@ -1,35 +1,32 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Orbit Theory 3D</title>
 
-body {
-  overflow: hidden;
-  background: black;
-  font-family: Arial, sans-serif;
-}
+  <link rel="stylesheet" href="style.css">
 
-canvas {
-  display: block;
-}
+  <script async src="https://unpkg.com/es-module-shims@1.10.0/dist/es-module-shims.js"></script>
 
-#ui {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-  z-index: 100;
-  color: white;
-}
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://unpkg.com/three@0.165.0/build/three.module.js"
+    }
+  }
+  </script>
+</head>
+<body>
 
-#title {
-  font-size: 32px;
-  font-weight: bold;
-  color: #4de2ff;
-  margin-bottom: 10px;
-  letter-spacing: 2px;
-}
+<div id="ui">
+  <div id="title">ORBIT THEORY</div>
+  <div id="controls">
+    W = THRUST · A/D = TURN · SHIFT = BOOST
+  </div>
+</div>
 
-#controls {
-  opacity: 0.8;
-}
+<script type="module" src="game.js"></script>
+
+</body>
+</html>
