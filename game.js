@@ -11,68 +11,120 @@ const camera = new THREE.PerspectiveCamera(
 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
+
 renderer.setSize(window.innerWidth, window.innerHeight);
+
 document.body.appendChild(renderer.domElement);
 
-const light = new THREE.DirectionalLight(0xffffff, 3);
-light.position.set(10, 20, 10);
-scene.add(light);
+//
+// LIGHTING
+//
 
 scene.add(new THREE.AmbientLight(0xffffff, 1.5));
+
+const light = new THREE.DirectionalLight(0xffffff, 2);
+
+light.position.set(50, 100, 50);
+
+scene.add(light);
+
+//
+// STARS
+//
+
+const starGeo = new THREE.BufferGeometry();
+
+const starVerts = [];
+
+for (let i = 0; i < 6000; i++) {
+
+  starVerts.push(
+    (Math.random() - 0.5) * 10000,
+    (Math.random() - 0.5) * 10000,
+    (Math.random() - 0.5) * 10000
+  );
+
+}
+
+starGeo.setAttribute(
+  'position',
+  new THREE.Float32BufferAttribute(starVerts, 3)
+);
+
+const stars = new THREE.Points(
+  starGeo,
+  new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 2
+  })
+);
+
+scene.add(stars);
+
+//
+// SHIP
+//
 
 const ship = new THREE.Group();
 
 const body = new THREE.Mesh(
   new THREE.ConeGeometry(2, 8, 16),
-  new THREE.MeshStandardMaterial({ color: 0xffffff })
+  new THREE.MeshStandardMaterial({
+    color: 0xffffff,
+    emissive: 0x111111
+  })
 );
+
 body.rotation.x = Math.PI / 2;
+
 ship.add(body);
 
 const wings = new THREE.Mesh(
   new THREE.BoxGeometry(10, 0.4, 2),
-  new THREE.MeshStandardMaterial({ color: 0x4de2ff })
+  new THREE.MeshStandardMaterial({
+    color: 0x4de2ff
+  })
 );
+
 wings.position.z = -2;
+
 ship.add(wings);
 
 scene.add(ship);
 
-const planet = new THREE.Mesh(
-  new THREE.SphereGeometry(25, 32, 32),
-  new THREE.MeshStandardMaterial({
-    color: 0xff4dd2,
-    emissive: 0x331122
-  })
-);
-planet.position.set(80, 10, -160);
-scene.add(planet);
+//
+// PLANETS
+//
 
-const starGeo = new THREE.BufferGeometry();
-const starPositions = [];
+function createPlanet(x, y, z, size, color) {
 
-for (let i = 0; i < 2000; i++) {
-  starPositions.push(
-    (Math.random() - 0.5) * 2000,
-    (Math.random() - 0.5) * 2000,
-    (Math.random() - 0.5) * 2000
+  const planet = new THREE.Mesh(
+    new THREE.SphereGeometry(size, 32, 32),
+    new THREE.MeshStandardMaterial({
+      color,
+      emissive: color,
+      emissiveIntensity: 0.15
+    })
   );
+
+  planet.position.set(x, y, z);
+
+  scene.add(planet);
+
+  return planet;
 }
 
-starGeo.setAttribute(
-  'position',
-  new THREE.Float32BufferAttribute(starPositions, 3)
-);
+const planets = [
+  createPlanet(100, 0, -300, 30, 0xff4dd2),
+  createPlanet(-250, 80, -700, 60, 0x4de2ff),
+  createPlanet(500, -100, -1200, 120, 0x5eff9b)
+];
 
-const stars = new THREE.Points(
-  starGeo,
-  new THREE.PointsMaterial({ color: 0xffffff, size: 2 })
-);
-
-scene.add(stars);
+//
+// CONTROLS
+//
 
 const keys = {};
-let speed = 0;
 
 window.addEventListener('keydown', e => {
   keys[e.key.toLowerCase()] = true;
@@ -82,36 +134,127 @@ window.addEventListener('keyup', e => {
   keys[e.key.toLowerCase()] = false;
 });
 
+//
+// POINTER LOCK
+//
+
+document.body.addEventListener('click', () => {
+  document.body.requestPointerLock();
+});
+
+let yaw = 0;
+let pitch = 0;
+
+document.addEventListener('mousemove', (e) => {
+
+  if (document.pointerLockElement === document.body) {
+
+    yaw -= e.movementX * 0.002;
+    pitch -= e.movementY * 0.002;
+
+    pitch = Math.max(-Math.PI / 2, Math.min(Math.PI / 2, pitch));
+
+  }
+
+});
+
+//
+// MOVEMENT
+//
+
+const velocity = new THREE.Vector3();
+
 function animate() {
+
   requestAnimationFrame(animate);
 
-  if (keys['a']) ship.rotation.y += 0.04;
-  if (keys['d']) ship.rotation.y -= 0.04;
+  //
+  // CAMERA ROTATION
+  //
 
-  if (keys['w']) speed += 0.04;
-  else speed *= 0.96;
+  camera.rotation.order = 'YXZ';
 
-  speed = Math.min(speed, keys['shift'] ? 2 : 1);
+  camera.rotation.y = yaw;
+  camera.rotation.x = pitch;
 
-  ship.position.x -= Math.sin(ship.rotation.y) * speed;
-  ship.position.z -= Math.cos(ship.rotation.y) * speed;
+  //
+  // FORWARD VECTOR
+  //
 
-  const camOffset = new THREE.Vector3(0, 8, 24);
-  camOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), ship.rotation.y);
+  const forward = new THREE.Vector3();
 
-  camera.position.copy(ship.position).add(camOffset);
+  camera.getWorldDirection(forward);
+
+  //
+  // MOVEMENT
+  //
+
+  if (keys['w']) {
+
+    velocity.add(
+      forward.clone().multiplyScalar(0.08)
+    );
+
+  }
+
+  if (keys['s']) {
+
+    velocity.add(
+      forward.clone().multiplyScalar(-0.05)
+    );
+
+  }
+
+  velocity.multiplyScalar(0.98);
+
+  ship.position.add(velocity);
+
+  //
+  // SHIP ROTATION
+  //
+
+  ship.lookAt(
+    ship.position.clone().add(forward)
+  );
+
+  //
+  // CAMERA FOLLOW
+  //
+
+  const camOffset = new THREE.Vector3(0, 4, 16);
+
+  camOffset.applyEuler(camera.rotation);
+
+  camera.position.copy(
+    ship.position.clone().add(camOffset)
+  );
+
   camera.lookAt(ship.position);
 
-  planet.rotation.y += 0.01;
-  stars.rotation.y += 0.0002;
+  //
+  // PLANET ROTATION
+  //
+
+  planets.forEach((planet, i) => {
+    planet.rotation.y += 0.002 * (i + 1);
+  });
 
   renderer.render(scene, camera);
+
 }
 
 animate();
 
+//
+// RESIZE
+//
+
 window.addEventListener('resize', () => {
+
   camera.aspect = window.innerWidth / window.innerHeight;
+
   camera.updateProjectionMatrix();
+
   renderer.setSize(window.innerWidth, window.innerHeight);
+
 });
