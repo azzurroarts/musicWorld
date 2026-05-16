@@ -119,7 +119,7 @@ function createPlanet(x, y, z, size, texturePath = null, fallbackColor = 0xfffff
       undefined,
       (err) => console.error('Planet texture failed:', texturePath, err)
     );
-
+planetTexture.colorSpace = THREE.SRGBColorSpace;
     material = new THREE.MeshBasicMaterial({
   map: planetTexture
 });
