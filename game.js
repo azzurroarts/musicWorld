@@ -16,6 +16,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 document.body.appendChild(renderer.domElement);
 
+
+const textureLoader = new THREE.TextureLoader();
 //
 // LIGHTING
 //
@@ -105,81 +107,46 @@ scene.add(ship);
 
 
 
-function createPlanet(x, y, z, size, texturePath = null, color = 0xffffff) {
-
+function createPlanet(x, y, z, size, texturePath = null, fallbackColor = 0xffffff) {
   const geometry = new THREE.SphereGeometry(size, 64, 64);
 
   let material;
 
   if (texturePath) {
-
-    const texture = textureLoader.load(texturePath);
+    const planetTexture = textureLoader.load(
+      texturePath,
+      () => console.log('Planet texture loaded:', texturePath),
+      undefined,
+      (err) => console.error('Planet texture failed:', texturePath, err)
+    );
 
     material = new THREE.MeshStandardMaterial({
-      map: texture,
-      emissive: 0x222222,
+      map: planetTexture,
       roughness: 1
     });
-
   } else {
-
     material = new THREE.MeshStandardMaterial({
-      color,
-      emissive: color,
+      color: fallbackColor,
+      emissive: fallbackColor,
       emissiveIntensity: 0.15
     });
-
   }
 
   const planet = new THREE.Mesh(geometry, material);
-
   planet.position.set(x, y, z);
-
   scene.add(planet);
-
-  return planet;
-}
-
-  planet.position.set(x, y, z);
-  planet.userData.radius = size;
-  scene.add(planet);
-
+planet.userData.radius = size;
   return planet;
 }
 const planets = [
-
-  createPlanet(
-    100,
-    0,
-    -300,
-    30,
-    'assets/EquirectPurplePlanet.jpg'
-  ),
-
-  createPlanet(
-    -250,
-    80,
-    -700,
-    60,
-    null,
-    0x4de2ff
-  ),
-
-  createPlanet(
-    500,
-    -100,
-    -1200,
-    120,
-    null,
-    0x5eff9b
-  )
-
+  createPlanet(100, 0, -300, 30, 'assets/EquirectPurplePlanet.jpg'),
+  createPlanet(-250, 80, -700, 60, null, 0x4de2ff),
+  createPlanet(500, -100, -1200, 120, null, 0x5eff9b)
 ];
+
 //
 // 2D SPRITE BILLBOARDS / PLACEHOLDERS
 //
-
-const textureLoader = new THREE.TextureLoader();
 
 function createBillboardSprite(url, x, y, z, scale = 30) {
   const texture = textureLoader.load(url);
