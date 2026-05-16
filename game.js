@@ -139,47 +139,15 @@ planet.userData.radius = size;
 }
 const planets = [
 
-  // PURPLE PLANET
-  createPlanet(0,120,-1800, 220, 'assets/EquirectPurplePlanet.jpg' ),
+  createPlanet(0, 800, -9000, 1100, 'assets/EquirectPurplePlanet.jpg'),
 
-  // GREEN PLANET
-  createPlanet(
-    -2200,
-    400,
-    -4200,
-    340,
-    'assets/EquirectGreenPlanet.jpg'
-  ),
+  createPlanet(-11000, 2200, -21000, 1700, 'assets/EquirectGreenPlanet.jpg'),
 
-  // ORANGE PLANET
-  createPlanet(
-    2600,
-    -300,
-    -5200,
-    420,
-    null,
-    0xff8833
-  ),
+  createPlanet(13000, -1800, -26000, 2100, null, 0xff8833),
 
-  // YELLOW PLANET
-  createPlanet(
-    -4800,
-    900,
-    -7600,
-    650,
-    null,
-    0xffdd55
-  ),
+  createPlanet(-24000, 4500, -38000, 3200, null, 0xffdd55),
 
-  // GIANT DISTANT PLANET
-  createPlanet(
-    6200,
-    -1400,
-    -12000,
-    1200,
-    null,
-    0x5eff9b
-  )
+  createPlanet(31000, -7000, -60000, 6000, null, 0x5eff9b)
 
 ];
 
