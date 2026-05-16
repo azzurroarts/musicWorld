@@ -2,13 +2,13 @@ import * as THREE from 'https://unpkg.com/three@0.165.0/build/three.module.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
-scene.fog = new THREE.Fog(0x000000, 12000, 90000);
+scene.fog = new THREE.Fog(0x000000, 25000, 180000);
 
 const camera = new THREE.PerspectiveCamera(
   75,
   window.innerWidth / window.innerHeight,
   0.1,
-  10000
+  200000
 );
 
 const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -39,11 +39,11 @@ scene.add(blueLight);
 const starGeo = new THREE.BufferGeometry();
 const starVerts = [];
 
-for (let i = 0; i < 7000; i++) {
+for (let i = 0; i < 12000; i++) {
   starVerts.push(
-    (Math.random() - 0.5) * 10000,
-    (Math.random() - 0.5) * 10000,
-    (Math.random() - 0.5) * 10000
+    (Math.random() - 0.5) * 180000,
+    (Math.random() - 0.5) * 180000,
+    (Math.random() - 0.5) * 180000
   );
 }
 
@@ -108,7 +108,7 @@ scene.add(ship);
 
 
 function createPlanet(x, y, z, size, texturePath = null, fallbackColor = 0xffffff) {
-  const geometry = new THREE.SphereGeometry(size, 64, 64);
+  const geometry = new THREE.SphereGeometry(size, 96,96);
 
   let material;
 
