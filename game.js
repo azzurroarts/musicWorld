@@ -396,7 +396,31 @@ if (!landed) {
 
   velocity.multiplyScalar(0.98);
   ship.position.add(velocity);
+// AUTO-LAND IF SHIP TOUCHES PLANET SURFACE
+if (!landed) {
+  for (const planet of planets) {
+    const distance = ship.position.distanceTo(planet.position);
+    const surfaceDistance = planet.userData.radius + landingHeight;
 
+    if (distance <= surfaceDistance) {
+      landed = true;
+      landedPlanet = planet;
+
+      surfaceNormal.copy(
+        ship.position.clone().sub(planet.position).normalize()
+      );
+
+      ship.position.copy(
+        planet.position.clone().add(
+          surfaceNormal.clone().multiplyScalar(surfaceDistance)
+        )
+      );
+
+      velocity.set(0, 0, 0);
+      break;
+    }
+  }
+}
   ship.lookAt(ship.position.clone().add(forward));
 } else if (landedPlanet) {
   surfaceNormal.copy(
