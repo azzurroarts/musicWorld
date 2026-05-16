@@ -103,15 +103,42 @@ scene.add(ship);
 // PLANETS
 //
 
-function createPlanet(x, y, z, size, color) {
-  const planet = new THREE.Mesh(
-    new THREE.SphereGeometry(size, 40, 40),
-    new THREE.MeshStandardMaterial({
+const textureLoader = new THREE.TextureLoader();
+
+function createPlanet(x, y, z, size, texturePath = null, color = 0xffffff) {
+
+  const geometry = new THREE.SphereGeometry(size, 64, 64);
+
+  let material;
+
+  if (texturePath) {
+
+    const texture = textureLoader.load(texturePath);
+
+    material = new THREE.MeshStandardMaterial({
+      map: texture,
+      emissive: 0x222222,
+      roughness: 1
+    });
+
+  } else {
+
+    material = new THREE.MeshStandardMaterial({
       color,
       emissive: color,
       emissiveIntensity: 0.15
-    })
-  );
+    });
+
+  }
+
+  const planet = new THREE.Mesh(geometry, material);
+
+  planet.position.set(x, y, z);
+
+  scene.add(planet);
+
+  return planet;
+}
 
   planet.position.set(x, y, z);
   planet.userData.radius = size;
@@ -119,13 +146,35 @@ function createPlanet(x, y, z, size, color) {
 
   return planet;
 }
-
 const planets = [
-  createPlanet(100, 0, -300, 30, 0xff4dd2),
-  createPlanet(-250, 80, -700, 60, 0x4de2ff),
-  createPlanet(500, -100, -1200, 120, 0x5eff9b)
-];
 
+  createPlanet(
+    100,
+    0,
+    -300,
+    30,
+    'assets/EquirectPurplePlanet.jpg'
+  ),
+
+  createPlanet(
+    -250,
+    80,
+    -700,
+    60,
+    null,
+    0x4de2ff
+  ),
+
+  createPlanet(
+    500,
+    -100,
+    -1200,
+    120,
+    null,
+    0x5eff9b
+  )
+
+];
 //
 // 2D SPRITE BILLBOARDS / PLACEHOLDERS
 //
