@@ -268,8 +268,17 @@ window.addEventListener('keydown', e => {
   if (key === ' ') {
     shootBullet();
   }
-});
 
+  if (key === 'e') {
+    if (landed) {
+      landed = false;
+      landedPlanet = null;
+      velocity.copy(surfaceNormal.clone().multiplyScalar(4));
+    } else {
+      tryLand();
+    }
+  }
+});
 window.addEventListener('keyup', e => {
   keys[e.key.toLowerCase()] = false;
 });
@@ -298,6 +307,10 @@ document.addEventListener('mousemove', e => {
 //
 
 const velocity = new THREE.Vector3();
+let landed = false;
+let landedPlanet = null;
+let surfaceNormal = new THREE.Vector3();
+const landingHeight = 10;
 
 function shootBullet() {
   const forward = new THREE.Vector3();
@@ -332,6 +345,33 @@ function makeImpactFlash(position, color = 0xffff00) {
 
 const flashes = [];
 
+function tryLand() {
+  for (const planet of planets) {
+    const distance = ship.position.distanceTo(planet.position);
+    const landingDistance = planet.userData.radius + 80;
+
+    if (distance < landingDistance) {
+      landed = true;
+      landedPlanet = planet;
+
+      surfaceNormal.copy(
+        ship.position.clone().sub(planet.position).normalize()
+      );
+
+      ship.position.copy(
+        planet.position.clone().add(
+          surfaceNormal.clone().multiplyScalar(
+            planet.userData.radius + landingHeight
+          )
+        )
+      );
+
+      velocity.set(0, 0, 0);
+      return;
+    }
+  }
+}
+
 function animate() {
   requestAnimationFrame(animate);
 
@@ -344,20 +384,64 @@ function animate() {
   const forward = new THREE.Vector3();
   camera.getWorldDirection(forward);
 
-  // MOVEMENT
+// MOVEMENT
+if (!landed) {
   if (keys['w']) {
-    velocity.add(forward.clone().multiplyScalar(0.08));
+    velocity.add(forward.clone().multiplyScalar(0.22));
   }
 
   if (keys['s']) {
-    velocity.add(forward.clone().multiplyScalar(-0.05));
+    velocity.add(forward.clone().multiplyScalar(-0.08));
   }
 
   velocity.multiplyScalar(0.98);
   ship.position.add(velocity);
 
-  // SHIP ROTATION
   ship.lookAt(ship.position.clone().add(forward));
+} else if (landedPlanet) {
+  surfaceNormal.copy(
+    ship.position.clone().sub(landedPlanet.position).normalize()
+  );
+
+  const right = new THREE.Vector3()
+    .crossVectors(surfaceNormal, forward)
+    .normalize();
+
+  const tangentForward = new THREE.Vector3()
+    .crossVectors(right, surfaceNormal)
+    .normalize();
+
+  if (keys['w']) {
+    surfaceNormal.add(tangentForward.multiplyScalar(0.006)).normalize();
+  }
+
+  if (keys['s']) {
+    surfaceNormal.add(tangentForward.multiplyScalar(-0.006)).normalize();
+  }
+
+  if (keys['a']) {
+    surfaceNormal.add(right.multiplyScalar(-0.006)).normalize();
+  }
+
+  if (keys['d']) {
+    surfaceNormal.add(right.multiplyScalar(0.006)).normalize();
+  }
+
+  ship.position.copy(
+    landedPlanet.position.clone().add(
+      surfaceNormal.clone().multiplyScalar(
+        landedPlanet.userData.radius + landingHeight
+      )
+    )
+  );
+
+  const lookTarget = ship.position.clone().add(tangentForward);
+  ship.up.copy(surfaceNormal);
+  ship.lookAt(lookTarget);
+}
+
+// SHIP ROTATION
+ship.lookAt(ship.position.clone().add(forward));
 
   // CAMERA FOLLOW
   const camOffset = new THREE.Vector3(0, 4, 16);
@@ -365,10 +449,23 @@ function animate() {
   camera.position.copy(ship.position.clone().add(camOffset));
   camera.lookAt(ship.position);
 
-  // PLANET ROTATION
-  planets.forEach((planet, i) => {
-    planet.rotation.y += 0.002 * (i + 1);
-  });
+  // PLANET ROTATION — slows near ship so landing works
+planets.forEach((planet, i) => {
+  const distance = ship.position.distanceTo(planet.position);
+
+  const slowStart = planet.userData.radius + 900;
+  const fullStop = planet.userData.radius + 250;
+
+  let rotationFactor = (distance - fullStop) / (slowStart - fullStop);
+
+  rotationFactor = Math.max(0, Math.min(1, rotationFactor));
+
+  if (landed && planet === landedPlanet) {
+    rotationFactor = 0;
+  }
+
+  planet.rotation.y += 0.002 * (i + 1) * rotationFactor;
+});
 
   // BULLETS
   for (let i = bullets.length - 1; i >= 0; i--) {
