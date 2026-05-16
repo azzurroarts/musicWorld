@@ -139,7 +139,7 @@ planet.userData.radius = size;
 }
 const planets = [
   createPlanet(100, 0, -300, 30, 'assets/EquirectPurplePlanet.jpg'),
-  createPlanet(-250, 80, -700, 60, null, 0x4de2ff),
+  createPlanet(-250, 80, -700, 60, 'assets/EquirectGreenPlanet.jpg'),
   createPlanet(500, -100, -1200, 120, null, 0x5eff9b)
 ];
 
