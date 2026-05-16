@@ -2,7 +2,7 @@ import * as THREE from 'https://unpkg.com/three@0.165.0/build/three.module.js';
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x000000);
-scene.fog = new THREE.Fog(0x000000, 800, 6000);
+scene.fog = new THREE.Fog(0x000000, 12000, 90000);
 
 const camera = new THREE.PerspectiveCamera(
   75,
