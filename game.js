@@ -176,7 +176,49 @@ const spriteNPCs = [
   createBillboardSprite('https://threejs.org/examples/textures/sprites/disc.png', -180, 60, -500, 45),
   createBillboardSprite('https://threejs.org/examples/textures/sprites/snowflake1.png', 260, -30, -380, 25)
 ];
+//
+// NPC UFO SHIPS
+//
 
+const npcShips = [];
+
+function createNPCShip(x, y, z, scale = 180) {
+  const texture = textureLoader.load('assets/UFO1.png');
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true
+  });
+
+  const ufo = new THREE.Sprite(material);
+
+  ufo.position.set(x, y, z);
+  ufo.scale.set(scale, scale * 0.55, 1);
+
+  ufo.userData.velocity = new THREE.Vector3(
+    (Math.random() - 0.5) * 8,
+    (Math.random() - 0.5) * 3,
+    (Math.random() - 0.5) * 8
+  );
+
+  ufo.userData.home = new THREE.Vector3(x, y, z);
+  ufo.userData.wanderTimer = Math.random() * 200;
+
+  scene.add(ufo);
+  npcShips.push(ufo);
+
+  return ufo;
+}
+
+for (let i = 0; i < 45; i++) {
+  createNPCShip(
+    (Math.random() - 0.5) * 60000,
+    (Math.random() - 0.5) * 12000,
+    -Math.random() * 70000,
+    120 + Math.random() * 180
+  );
+}
 //
 // SIMPLE METEORS
 //
@@ -545,7 +587,38 @@ planets.forEach((planet, i) => {
   }
 
   stars.rotation.y += 0.00003;
+// NPC UFO SHIPS
+npcShips.forEach(ufo => {
+  ufo.userData.wanderTimer--;
 
+  if (ufo.userData.wanderTimer <= 0) {
+    ufo.userData.velocity.add(
+      new THREE.Vector3(
+        (Math.random() - 0.5) * 3,
+        (Math.random() - 0.5) * 1,
+        (Math.random() - 0.5) * 3
+      )
+    );
+
+    ufo.userData.wanderTimer = 100 + Math.random() * 200;
+  }
+
+  const homePull = ufo.userData.home
+    .clone()
+    .sub(ufo.position)
+    .multiplyScalar(0.0008);
+
+  ufo.userData.velocity.add(homePull);
+  ufo.userData.velocity.clampLength(1, 12);
+
+  ufo.position.add(ufo.userData.velocity);
+
+  // face camera, but flip depending on travel direction
+  const screenRight = new THREE.Vector3(1, 0, 0).applyQuaternion(camera.quaternion);
+  const movingRight = ufo.userData.velocity.dot(screenRight);
+
+  ufo.material.rotation = movingRight < 0 ? Math.PI : 0;
+});
   renderer.render(scene, camera);
 }
 
