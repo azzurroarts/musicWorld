@@ -103,7 +103,7 @@ scene.add(ship);
 // PLANETS
 //
 
-const textureLoader = new THREE.TextureLoader();
+
 
 function createPlanet(x, y, z, size, texturePath = null, color = 0xffffff) {
 
