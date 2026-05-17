@@ -220,38 +220,60 @@ for (let i = 0; i < 45; i++) {
   );
 }
 //
-// SIMPLE METEORS
+// SPRITE METEORS
 //
 
-function createMeteor(x, y, z, size = 12) {
-  const meteor = new THREE.Mesh(
-    new THREE.IcosahedronGeometry(size, 1),
-    new THREE.MeshStandardMaterial({
-      color: 0x888888,
-      roughness: 0.8,
-      emissive: 0x111111
-    })
+const meteors = [];
+const maxMeteors = 80;
+
+function createMeteorNearShip() {
+  const id = Math.floor(Math.random() * 10) + 1;
+  const texture = textureLoader.load(`assets/meteor_${id}.png`);
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const material = new THREE.SpriteMaterial({
+    map: texture,
+    transparent: true
+  });
+
+  const meteor = new THREE.Sprite(material);
+
+  const forward = new THREE.Vector3();
+  camera.getWorldDirection(forward);
+
+  const randomOffset = new THREE.Vector3(
+    (Math.random() - 0.5) * 9000,
+    (Math.random() - 0.5) * 5000,
+    (Math.random() - 0.5) * 9000
   );
 
-  meteor.position.set(x, y, z);
-  meteor.userData.radius = size;
-  meteor.userData.velocity = new THREE.Vector3(
-    (Math.random() - 0.5) * 0.7,
-    (Math.random() - 0.5) * 0.7,
-    (Math.random() - 0.5) * 0.7
+  meteor.position.copy(
+    ship.position
+      .clone()
+      .add(forward.multiplyScalar(7000 + Math.random() * 9000))
+      .add(randomOffset)
   );
+
+  const size = 180 + Math.random() * 500;
+  meteor.scale.set(size, size, 1);
+
+  meteor.userData.radius = size * 0.35;
+  meteor.userData.velocity = new THREE.Vector3(
+    (Math.random() - 0.5) * 4,
+    (Math.random() - 0.5) * 4,
+    (Math.random() - 0.5) * 4
+  );
+
+  meteor.userData.spin = (Math.random() - 0.5) * 0.04;
+  meteor.userData.hitSpin = 0;
 
   scene.add(meteor);
-  return meteor;
+  meteors.push(meteor);
 }
 
-const meteors = [
-  createMeteor(0, 30, -180, 11),
-  createMeteor(170, -40, -430, 16),
-  createMeteor(-130, 90, -360, 13),
-  createMeteor(360, 40, -760, 22),
-  createMeteor(-420, -20, -920, 18)
-];
+for (let i = 0; i < maxMeteors; i++) {
+  createMeteorNearShip();
+}
 
 //
 // CONTROLS
@@ -260,8 +282,7 @@ const meteors = [
 const keys = {};
 const positionReadout = document.getElementById('positionReadout');
 const bullets = [];
-const planetVelocities = planets.map(() => new THREE.Vector3());
-const meteorVelocities = meteors.map(meteor => meteor.userData.velocity.clone());
+
 
 window.addEventListener('keydown', e => {
   const key = e.key.toLowerCase();
@@ -514,64 +535,50 @@ planets.forEach((planet, i) => {
       continue;
     }
 
-    // Hit planets
-    for (let j = 0; j < planets.length; j++) {
-      const planet = planets[j];
-      const distance = bullet.position.distanceTo(planet.position);
+   
 
-      if (distance < planet.userData.radius + 2) {
-        const knockback = planet.position.clone()
-          .sub(bullet.position)
-          .normalize()
-          .multiplyScalar(4);
+   // Hit meteors
+for (let j = meteors.length - 1; j >= 0 && bullets[i]; j--) {
+  const meteor = meteors[j];
+  const distance = bullet.position.distanceTo(meteor.position);
 
-        planetVelocities[j].add(knockback);
-        planet.scale.set(1.25, 1.25, 1.25);
-        flashes.push(makeImpactFlash(bullet.position, 0xffff00));
+  if (distance < meteor.userData.radius + 2) {
+    const knockback = meteor.position
+      .clone()
+      .sub(bullet.position)
+      .normalize()
+      .multiplyScalar(18);
 
-        scene.remove(bullet);
-        bullets.splice(i, 1);
-        break;
-      }
-    }
+    meteor.userData.velocity.add(knockback);
+    meteor.userData.hitSpin += 0.25;
 
-    // Hit meteors
-    for (let j = 0; j < meteors.length && bullets[i]; j++) {
-      const meteor = meteors[j];
-      const distance = bullet.position.distanceTo(meteor.position);
+    flashes.push(makeImpactFlash(bullet.position, 0xffaa00));
 
-      if (distance < meteor.userData.radius + 2) {
-        const knockback = meteor.position.clone()
-          .sub(bullet.position)
-          .normalize()
-          .multiplyScalar(2.5);
-
-        meteorVelocities[j].add(knockback);
-        meteor.scale.set(1.35, 1.35, 1.35);
-        flashes.push(makeImpactFlash(bullet.position, 0xffaa00));
-
-        scene.remove(bullet);
-        bullets.splice(i, 1);
-        break;
-      }
-    }
+    scene.remove(bullet);
+    bullets.splice(i, 1);
+    break;
   }
+}
 
-  // PLANET BOUNCE / KNOCKBACK
-  planets.forEach((planet, index) => {
-    planet.position.add(planetVelocities[index]);
-    planetVelocities[index].multiplyScalar(0.94);
-    planet.scale.lerp(new THREE.Vector3(1, 1, 1), 0.08);
-  });
 
-  // METEOR DRIFT / KNOCKBACK
-  meteors.forEach((meteor, index) => {
-    meteor.position.add(meteorVelocities[index]);
-    meteorVelocities[index].multiplyScalar(0.985);
-    meteor.rotation.x += 0.01 + index * 0.002;
-    meteor.rotation.y += 0.015 + index * 0.002;
-    meteor.scale.lerp(new THREE.Vector3(1, 1, 1), 0.08);
-  });
+ // METEOR DRIFT / RESPAWN
+for (let i = meteors.length - 1; i >= 0; i--) {
+  const meteor = meteors[i];
+
+  meteor.position.add(meteor.userData.velocity);
+  meteor.userData.velocity.multiplyScalar(0.992);
+
+  meteor.material.rotation += meteor.userData.spin + meteor.userData.hitSpin;
+  meteor.userData.hitSpin *= 0.96;
+
+  const distanceFromShip = meteor.position.distanceTo(ship.position);
+
+  if (distanceFromShip > 45000) {
+    scene.remove(meteor);
+    meteors.splice(i, 1);
+    createMeteorNearShip();
+  }
+}
 
   // FLASHES
   for (let i = flashes.length - 1; i >= 0; i--) {
