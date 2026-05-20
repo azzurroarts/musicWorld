@@ -559,6 +559,7 @@ for (let j = meteors.length - 1; j >= 0 && bullets[i]; j--) {
     break;
   }
 }
+  }
 
 
  // METEOR DRIFT / RESPAWN
